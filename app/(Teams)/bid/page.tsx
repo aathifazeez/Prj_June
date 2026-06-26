@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import MobileOnlyWrapper from "@/components/MobileOnlyWrapper";
+import BottomNavBar from "@/components/BottomNavBar";
 
 const BID_COLOR = "#e45d35";
 
@@ -127,7 +128,7 @@ export default function BidPage() {
         {/* ── Snap scroll body ── */}
         <div
           ref={scrollRef}
-          className="snap-scroll flex-1 min-h-0"
+          className="snap-scroll flex-1 min-h-0 pb-[72px]"
         >
           {/* ══ PAGE 1: Player card + scroll hint ══ */}
           <div
@@ -238,33 +239,7 @@ export default function BidPage() {
         </div>
 
         {/* ── Bottom Nav ── */}
-        <nav
-          className="shrink-0 z-50 flex justify-around items-center px-2 h-[72px]
-                     bg-[rgba(16,20,21,0.85)] backdrop-blur-2xl border-t border-white/10"
-        >
-          {[
-            { icon: "gavel",    label: "Auction", active: true  },
-            { icon: "groups",   label: "Squad",   active: false },
-            { icon: "payments", label: "Budget",  active: false },
-            { icon: "reorder",  label: "History", active: false },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="flex flex-col items-center justify-center gap-0.5 px-3 py-1 rounded-xl"
-              style={item.active
-                ? { color: BID_COLOR, backgroundColor: `${BID_COLOR}1A` }
-                : { color: "#c6c6cd" }}
-            >
-              <span
-                className="material-symbols-outlined"
-                style={item.active ? { fontVariationSettings: "'FILL' 1" } : {}}
-              >
-                {item.icon}
-              </span>
-              <span className="font-['Geist'] text-xs">{item.label}</span>
-            </div>
-          ))}
-        </nav>
+          <BottomNavBar />
       </div>
     </MobileOnlyWrapper>
   );

@@ -1,0 +1,4 @@
+{
+  "/(Teams)/squad/page": "app/(Teams)/squad/page.js",
+  "/(Teams)/history/page": "app/(Teams)/history/page.js"
+}

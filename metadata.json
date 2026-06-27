@@ -1,6 +1,0 @@
-{
-  "name": "APL Auction",
-  "description": "A live cricket auction application with real-time bidding, team management, and a broadcast screen.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

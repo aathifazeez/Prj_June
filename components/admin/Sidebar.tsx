@@ -8,6 +8,8 @@ import {
   Users,
   Shield,
   Gavel,
+  Trophy,
+  MonitorPlay,
   LogOut,
 } from "lucide-react";
 
@@ -16,6 +18,8 @@ const navItems = [
   { href: "/admin/players",   label: "Players",   icon: Users },
   { href: "/admin/teams",     label: "Teams",     icon: Shield },
   { href: "/admin/auction",   label: "Auction",   icon: Gavel },
+  { href: "/results",         label: "Results",   icon: Trophy },
+  { href: "/screen",          label: "Big Screen", icon: MonitorPlay },
 ];
 
 export default function Sidebar() {
@@ -51,7 +55,7 @@ export default function Sidebar() {
       {/* Nav */}
       <nav className="flex-1 p-3 flex flex-col gap-0.5">
         {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname.startsWith(href);
+          const active = pathname === href || (href.length > 1 && pathname.startsWith(href) && href.startsWith("/admin"));
           return (
             <Link
               key={href}

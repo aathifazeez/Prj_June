@@ -52,7 +52,32 @@ export default function AuctionControl({ initialState, initialTeams, initialCoun
   const [selectedTeamId,  setSelectedTeamId]  = useState("");
   const [soldFor,         setSoldFor]         = useState("");
   const [loading,         setLoading]         = useState(false);
+  const [errorMsg,        setErrorMsg]        = useState<string | null>(null);
   const rollingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const safeFetch = async (url: string, init?: RequestInit) => {
+    setErrorMsg(null);
+    try {
+      const res  = await fetch(url, init);
+      const text = await res.text();
+      let json: unknown = null;
+      try { json = text ? JSON.parse(text) : null; } catch { /* not json */ }
+
+      if (!res.ok) {
+        const errorField = (json as { error?: string } | null)?.error;
+        const message    = errorField ?? `${res.status} ${res.statusText}`;
+        setErrorMsg(message);
+        console.error(`[AuctionControl] ${url} failed:`, message);
+        return null;
+      }
+      return json;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "network error";
+      setErrorMsg(message);
+      console.error(`[AuctionControl] ${url} threw:`, e);
+      return null;
+    }
+  };
 
   // Fetch fresh state + teams + counts from the server
   const refreshAll = useCallback(async () => {
@@ -94,12 +119,12 @@ export default function AuctionControl({ initialState, initialTeams, initialCoun
   useEffect(() => {
     if (auctionState.status !== "rolling") return;
     rollingTimer.current = setTimeout(async () => {
-      const res = await fetch("/api/auction/state", {
+      const json = await safeFetch("/api/auction/state", {
         method:  "PATCH",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ status: "bidding" }),
       });
-      if (res.ok) setAuctionState(await res.json());
+      if (json) setAuctionState(json as AuctionState);
     }, ROLLING_MS);
     return () => {
       if (rollingTimer.current) clearTimeout(rollingTimer.current);
@@ -108,12 +133,12 @@ export default function AuctionControl({ initialState, initialTeams, initialCoun
 
   const patchStatus = async (status: string) => {
     setLoading(true);
-    const res = await fetch("/api/auction/state", {
+    const json = await safeFetch("/api/auction/state", {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ status }),
     });
-    if (res.ok) setAuctionState(await res.json());
+    if (json) setAuctionState(json as AuctionState);
     setLoading(false);
   };
 
@@ -124,7 +149,7 @@ export default function AuctionControl({ initialState, initialTeams, initialCoun
   const handleAssign = async (markUnsold = false) => {
     if (!markUnsold && (!selectedTeamId || !soldFor)) return;
     setLoading(true);
-    await fetch("/api/auction/assign", {
+    await safeFetch("/api/auction/assign", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify(
@@ -148,6 +173,30 @@ export default function AuctionControl({ initialState, initialTeams, initialCoun
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Error banner */}
+      {errorMsg && (
+        <div
+          className="flex items-start gap-3 px-4 py-3 rounded-xl border text-sm"
+          style={{
+            background:  "var(--color-error-dim)",
+            borderColor: "var(--color-error)",
+            color:       "#fecaca",
+          }}
+        >
+          <XCircle size={18} className="shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-semibold mb-0.5">Auction action failed</p>
+            <p className="text-xs opacity-90 break-all">{errorMsg}</p>
+          </div>
+          <button
+            onClick={() => setErrorMsg(null)}
+            className="text-xs underline opacity-80 hover:opacity-100"
+          >
+            dismiss
+          </button>
+        </div>
+      )}
+
       {/* Top status bar */}
       <div
         className="flex items-center justify-between px-5 py-3 rounded-xl border"

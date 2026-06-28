@@ -1,33 +1,21 @@
 import { getServerSupabase } from "@/lib/supabase/server";
+import { getAuctionState } from "@/lib/supabase/auction-state";
 import ScreenStage from "@/components/screen/ScreenStage";
 import type { Player } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-const PLAYER_FIELDS = "id, name, photo_url, role, base_points, status, team_id, sold_for, auction_order, created_at";
-const STATE_SELECT  = `*, current_player:players(${PLAYER_FIELDS}, team:teams(id, name, color_hex))`;
-
 export default async function ScreenPage() {
   const supabase = getServerSupabase();
 
-  const [{ data: stateRaw }, { data: teams }, { data: players }] = await Promise.all([
-    supabase.from("auction_state").select(STATE_SELECT).single(),
+  const [state, { data: teams }, { data: players }] = await Promise.all([
+    getAuctionState(supabase),
     supabase.from("teams").select("*").order("created_at", { ascending: true }),
     supabase
       .from("players")
       .select("id, name, photo_url, role, status, team_id, sold_for")
       .order("auction_order", { ascending: true, nullsFirst: false }),
   ]);
-
-  let state = stateRaw;
-  if (!state) {
-    const { data: created } = await supabase
-      .from("auction_state")
-      .insert({ status: "idle", current_player_id: null })
-      .select(STATE_SELECT)
-      .single();
-    state = created;
-  }
 
   const allPlayers = (players ?? []) as Pick<Player, "id" | "name" | "photo_url" | "role" | "status" | "team_id" | "sold_for">[];
   const pending    = allPlayers.filter((p) => p.status === "pending");
@@ -45,16 +33,6 @@ export default async function ScreenPage() {
     unsold:  unsold.length,
   };
   const initialSpend = sold.reduce((s, p) => s + (p.sold_for ?? 0), 0);
-
-  if (!state) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--color-bg)" }}>
-        <p className="font-display text-2xl" style={{ color: "var(--color-error)" }}>
-          AUCTION STATE UNAVAILABLE
-        </p>
-      </div>
-    );
-  }
 
   return (
     <ScreenStage

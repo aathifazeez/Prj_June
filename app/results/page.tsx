@@ -32,7 +32,7 @@ export default async function ResultsPage() {
       .from("players")
       .select("*, team:teams(id, name, color_hex, budget, budget_used, logo_url, created_at)")
       .order("sold_for", { ascending: false }),
-    supabase.from("auction_state").select("status").single(),
+    supabase.from("auction_state").select("status").order("updated_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const allPlayers = (players ?? []) as PlayerWithTeam[];

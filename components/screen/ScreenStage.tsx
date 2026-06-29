@@ -120,7 +120,6 @@ export default function ScreenStage({
       style={{ background: "var(--color-bg)" }}
     >
       <StarField />
-      <TopBar status={state.status} />
 
       <AnimatePresence mode="wait">
         {state.status === "idle" && (
@@ -179,66 +178,6 @@ export default function ScreenStage({
         totalSpend={spend}
       />
 
-      <style>{`
-        @keyframes mna-pulse {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50%      { opacity: 1;   transform: scale(1.3); }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function TopBar({ status }: { status: AuctionState["status"] }) {
-  return (
-    <div
-      className="relative z-40 flex items-center justify-between px-10 py-5 border-b"
-      style={{ borderColor: "var(--color-border-subtle)" }}
-    >
-      <div className="flex items-center gap-4">
-        <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center font-display text-2xl"
-          style={{
-            background: "linear-gradient(135deg, var(--color-gold-bright), var(--color-gold-dim))",
-            color:      "#0a0e1a",
-            boxShadow:  "0 0 24px rgba(245,158,11,0.45), inset 0 1px 0 rgba(255,255,255,0.4)",
-          }}
-        >
-          M
-        </div>
-        <div>
-          <p className="font-display tracking-[0.35em] text-2xl leading-none" style={{ color: "var(--color-text)" }}>
-            MOON&nbsp;NIGHT
-          </p>
-          <p className="text-[11px] tracking-[0.6em] mt-1" style={{ color: "var(--color-text-subtle)" }}>
-            AUCTION
-          </p>
-        </div>
-      </div>
-
-      <div
-        className="flex items-center gap-3 px-5 py-2.5 rounded-full"
-        style={{
-          background: "rgba(17,24,39,0.75)",
-          border:     "1px solid var(--color-border)",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <span
-          className="w-2.5 h-2.5 rounded-full"
-          style={{
-            background: getStatusColor(status),
-            boxShadow:  `0 0 12px ${getStatusColor(status)}`,
-            animation:  "mna-pulse 1.4s ease-in-out infinite",
-          }}
-        />
-        <span
-          className="font-display tracking-[0.4em] text-xs"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          {getStatusLabel(status)}
-        </span>
-      </div>
     </div>
   );
 }
@@ -256,28 +195,4 @@ function Footer({
       <span>{totalSpend.toLocaleString()}&nbsp;PTS&nbsp;COMMITTED</span>
     </div>
   );
-}
-
-const STATUS_LABEL: Record<AuctionState["status"], string> = {
-  idle:    "STANDING BY",
-  rolling: "PICKING PLAYER",
-  bidding: "BIDDING LIVE",
-  sold:    "SOLD",
-  ended:   "AUCTION COMPLETE",
-};
-
-function getStatusLabel(status: AuctionState["status"]) {
-  return STATUS_LABEL[status];
-}
-
-const STATUS_COLOR: Record<AuctionState["status"], string> = {
-  idle:    "var(--color-gold-bright)",
-  rolling: "var(--color-gold-bright)",
-  bidding: "var(--color-error)",
-  sold:    "var(--color-success)",
-  ended:   "var(--color-text-muted)",
-};
-
-function getStatusColor(status: AuctionState["status"]) {
-  return STATUS_COLOR[status];
 }

@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface Star {
@@ -35,6 +36,29 @@ export default function StarField() {
             "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(245, 158, 11, 0.10), transparent 70%), radial-gradient(ellipse 60% 40% at 50% 100%, rgba(139, 92, 246, 0.06), transparent 70%)",
         }}
       />
+
+      {/* League logo watermark */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="relative"
+          style={{
+            width:  "min(72vh, 62vw)",
+            height: "min(72vh, 62vw)",
+            opacity: 0.07,
+            filter:  "drop-shadow(0 0 80px rgba(245,158,11,0.35))",
+            mixBlendMode: "screen",
+          }}
+        >
+          <Image
+            src="/image/IMG_3054.PNG"
+            alt=""
+            fill
+            priority
+            sizes="(max-width: 1024px) 62vw, 72vh"
+            className="object-contain select-none"
+          />
+        </div>
+      </div>
 
       {/* Subtle grid */}
       <div

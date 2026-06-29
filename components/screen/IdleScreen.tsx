@@ -34,50 +34,27 @@ export default function IdleScreen({
         transition={{ delay: 0.2, duration: 0.8 }}
         className="flex flex-col items-center gap-6 mb-20"
       >
-        <div
-          className="flex items-center gap-3 px-6 py-2 rounded-full border"
-          style={{
-            background: "rgba(245, 158, 11, 0.08)",
-            borderColor: "var(--color-gold-dim)",
-            boxShadow: "0 0 30px rgba(245, 158, 11, 0.15)",
-          }}
-        >
-          <span
-            className="w-2.5 h-2.5 rounded-full"
-            style={{
-              background: "var(--color-gold-bright)",
-              boxShadow: "0 0 12px var(--color-gold-bright)",
-              animation: "mna-pulse 1.6s ease-in-out infinite",
-            }}
-          />
-          <span
-            className="font-display text-xl tracking-[0.3em]"
-            style={{ color: "var(--color-gold-bright)" }}
-          >
-            STANDING&nbsp;BY
-          </span>
-        </div>
-
         <motion.h1
           animate={{
-            textShadow: [
-              "0 0 30px rgba(245,158,11,0.3)",
-              "0 0 60px rgba(245,158,11,0.55)",
-              "0 0 30px rgba(245,158,11,0.3)",
+            filter: [
+              "drop-shadow(0 0 22px rgba(245,158,11,0.40)) drop-shadow(0 0 44px rgba(251,191,36,0.22))",
+              "drop-shadow(0 0 34px rgba(245,158,11,0.55)) drop-shadow(0 0 64px rgba(251,191,36,0.32))",
+              "drop-shadow(0 0 22px rgba(245,158,11,0.40)) drop-shadow(0 0 44px rgba(251,191,36,0.22))",
             ],
           }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
           className="font-display text-center leading-[0.9] tracking-wider"
           style={{
-            fontSize: "clamp(96px, 14vw, 240px)",
-            color: "var(--color-text)",
+            fontSize:             "clamp(96px, 13vw, 240px)",
+            color:                "transparent",
             background:
-              "linear-gradient(180deg, #fef3c7 0%, var(--color-gold-bright) 40%, var(--color-gold) 80%)",
+              "linear-gradient(180deg, #ffffff 0%, #fef9c3 18%, var(--color-gold-bright) 55%, var(--color-gold) 90%, #b45309 100%)",
+            backgroundClip:       "text",
             WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            WebkitTextFillColor:  "transparent",
           }}
         >
-          AWAITING<br />NEXT&nbsp;PLAYER
+          MOON&nbsp;KNIGHT<br />SUPER&nbsp;LEAGUE
         </motion.h1>
 
         <div className="flex items-center gap-3 mt-2">
@@ -86,7 +63,7 @@ export default function IdleScreen({
             className="font-display text-2xl tracking-[0.4em]"
             style={{ color: "var(--color-text-muted)" }}
           >
-            THE STAGE IS SET
+            AWAITING&nbsp;NEXT&nbsp;PLAYER
           </p>
           <Sparkles className="w-5 h-5" style={{ color: "var(--color-gold)" }} />
         </div>
@@ -155,12 +132,6 @@ export default function IdleScreen({
         </motion.div>
       )}
 
-      <style>{`
-        @keyframes mna-pulse {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50%      { opacity: 1;   transform: scale(1.3); }
-        }
-      `}</style>
     </motion.div>
   );
 }

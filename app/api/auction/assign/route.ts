@@ -14,10 +14,10 @@ export async function POST(req: NextRequest) {
 
     const rowId = await ensureAuctionStateRowId(supabase);
 
-    // Look up the player currently up for auction
+    // Look up the player currently up for auction + live bid columns
     const { data: stateRow, error: stateErr } = await supabase
       .from("auction_state")
-      .select("current_player_id")
+      .select("current_player_id, current_bid, current_bid_team")
       .eq("id", rowId)
       .single();
 
@@ -29,6 +29,15 @@ export async function POST(req: NextRequest) {
     }
     const playerId = stateRow.current_player_id;
 
+    // Always reset live-bid columns when the auction returns to idle
+    const stateReset = {
+      status:           "idle",
+      current_player_id: null,
+      current_bid:      0,
+      current_bid_team: null,
+      next_min_bid:     0,
+    };
+
     // ── UNSOLD path ──────────────────────────────────────────────
     if (body.mark_unsold) {
       const [playerRes, stateRes] = await Promise.all([
@@ -36,7 +45,7 @@ export async function POST(req: NextRequest) {
           .update({ status: "unsold", team_id: null, sold_for: null })
           .eq("id", playerId),
         supabase.from("auction_state")
-          .update({ status: "idle", current_player_id: null })
+          .update(stateReset)
           .eq("id", rowId),
       ]);
 
@@ -50,9 +59,16 @@ export async function POST(req: NextRequest) {
     }
 
     // ── SOLD path ───────────────────────────────────────────────
-    const { team_id, sold_for } = body;
-    if (!team_id || sold_for === undefined || sold_for === null || sold_for === "") {
-      return Response.json({ error: "team_id and sold_for are required" }, { status: 400 });
+    // Body may override (admin "edit price" toggle); otherwise we
+    // finalize using the live bid columns the bid panel filled in.
+    const team_id  = body.team_id  ?? stateRow.current_bid_team;
+    const sold_for = body.sold_for ?? stateRow.current_bid;
+
+    if (!team_id) {
+      return Response.json(
+        { error: "no leading bid yet — pick a team or record a bid first" },
+        { status: 400 },
+      );
     }
     const price = Number(sold_for);
     if (!Number.isFinite(price) || price <= 0) {
@@ -82,7 +98,7 @@ export async function POST(req: NextRequest) {
       }).eq("id", team_id),
 
       supabase.from("auction_state")
-        .update({ status: "idle", current_player_id: null })
+        .update(stateReset)
         .eq("id", rowId),
     ]);
 

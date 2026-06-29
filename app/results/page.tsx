@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Trophy, Users, Coins, BarChart2, UserCircle } from "lucide-react";
 import type { Player, Team, PlayerRole } from "@/types";
+import DownloadPdfButton from "@/components/results/DownloadPdfButton";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,12 @@ export default async function ResultsPage() {
               LIVE
             </span>
           )}
+          <DownloadPdfButton
+            teams={teamRosters}
+            sold={sold}
+            unsold={unsold}
+            totalSpend={totalSpend}
+          />
           <Link
             href="/admin/dashboard"
             className="px-4 py-2 rounded-lg text-sm font-medium border"

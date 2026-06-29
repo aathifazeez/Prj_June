@@ -25,7 +25,7 @@ export default function EndedScreen({ teams, totalPlayers, totalSpend }: Props) 
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.7 }}
-      className="relative z-10 flex flex-col items-center min-h-screen px-10 py-20"
+      className="relative z-10 flex flex-col items-center h-full w-full overflow-auto px-10 py-12"
     >
       {/* Title */}
       <motion.div

@@ -116,52 +116,66 @@ export default function ScreenStage({
 
   return (
     <div
-      className="relative min-h-screen w-full overflow-hidden"
-      style={{ background: "var(--color-bg)" }}
+      className="relative w-screen overflow-hidden grid"
+      style={{
+        background:        "var(--color-bg)",
+        height:            "100dvh",
+        gridTemplateRows:  "1fr auto",
+      }}
     >
       <StarField />
 
-      <AnimatePresence mode="wait">
-        {state.status === "idle" && (
-          <IdleScreen
-            key="idle"
-            teams={teams}
-            pendingCount={counts.pending}
-            soldCount={counts.sold}
-            unsoldCount={counts.unsold}
-            totalSpend={spend}
-          />
-        )}
+      {/* Row 1 — stage */}
+      <div className="relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {state.status === "idle" && (
+            <IdleScreen
+              key="idle"
+              teams={teams}
+              pendingCount={counts.pending}
+              soldCount={counts.sold}
+              unsoldCount={counts.unsold}
+              totalSpend={spend}
+            />
+          )}
 
-        {state.status === "rolling" && (
-          <RollingAnimation
-            key="rolling"
-            pending={pending}
-            pickedPlayer={state.current_player ?? null}
-          />
-        )}
+          {state.status === "rolling" && (
+            <RollingAnimation
+              key="rolling"
+              pending={pending}
+              pickedPlayer={state.current_player ?? null}
+            />
+          )}
 
-        {state.status === "bidding" && state.current_player && (
-          <BiddingState
-            key="bidding"
-            player={state.current_player}
-            teams={teams}
-          />
-        )}
+          {state.status === "bidding" && state.current_player && (
+            <BiddingState
+              key="bidding"
+              player={state.current_player}
+            />
+          )}
 
-        {state.status === "ended" && (
-          <EndedScreen
-            key="ended"
-            teams={teams.map((t) => ({
-              ...t,
-              playersBought: boughtByTeam[t.id] ?? 0,
-            }))}
-            totalPlayers={totalPlayers}
-            totalSpend={spend}
-          />
-        )}
-      </AnimatePresence>
+          {state.status === "ended" && (
+            <EndedScreen
+              key="ended"
+              teams={teams.map((t) => ({
+                ...t,
+                playersBought: boughtByTeam[t.id] ?? 0,
+              }))}
+              totalPlayers={totalPlayers}
+              totalSpend={spend}
+            />
+          )}
+        </AnimatePresence>
+      </div>
 
+      {/* Row 2 — footer slot. BidTicker lands here in Phase 4. */}
+      <Footer
+        status={state.status}
+        pendingCount={counts.pending}
+        totalSpend={spend}
+      />
+
+      {/* SoldOverlay — fixed full-viewport, lives outside the grid */}
       <AnimatePresence>
         {overlayPlayer && (
           <SoldOverlay
@@ -172,12 +186,6 @@ export default function ScreenStage({
         )}
       </AnimatePresence>
 
-      <Footer
-        status={state.status}
-        pendingCount={counts.pending}
-        totalSpend={spend}
-      />
-
     </div>
   );
 }
@@ -185,10 +193,12 @@ export default function ScreenStage({
 function Footer({
   status, pendingCount, totalSpend,
 }: { status: AuctionState["status"]; pendingCount: number; totalSpend: number }) {
-  if (status === "ended" || status === "rolling") return null;
+  // Hidden during rolling (distracts from the reel), bidding (BidTicker
+  // takes over in Phase 4), and ended (own footer in EndedScreen).
+  if (status === "ended" || status === "rolling" || status === "bidding") return null;
   return (
     <div
-      className="absolute z-30 bottom-0 left-0 right-0 px-10 py-4 flex items-center justify-between text-xs tracking-[0.35em] font-display"
+      className="relative z-30 px-10 py-4 flex items-center justify-between text-xs tracking-[0.35em] font-display"
       style={{ color: "var(--color-text-subtle)" }}
     >
       <span>{pendingCount.toLocaleString()}&nbsp;IN&nbsp;POOL</span>

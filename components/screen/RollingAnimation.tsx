@@ -74,7 +74,7 @@ export default function RollingAnimation({ pending, pickedPlayer }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.04 }}
       transition={{ duration: 0.5 }}
-      className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6"
+      className="relative z-10 flex flex-col items-center justify-center h-full w-full overflow-hidden px-6"
     >
       {/* Headline */}
       <motion.div

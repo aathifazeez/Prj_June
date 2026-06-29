@@ -3,7 +3,8 @@ import type { AuctionState } from "@/types";
 
 const PLAYER_FIELDS    = "id, name, photo_url, role, base_points, status, team_id, sold_for, auction_order, created_at";
 const PLAYER_WITH_TEAM = `${PLAYER_FIELDS}, team:teams(id, name, color_hex)`;
-export const STATE_SELECT = `*, current_player:players(${PLAYER_WITH_TEAM})`;
+const BID_TEAM_FIELDS  = "id, name, color_hex, budget, budget_used";
+export const STATE_SELECT = `*, current_player:players(${PLAYER_WITH_TEAM}), current_bid_team_obj:teams!auction_state_current_bid_team_fkey(${BID_TEAM_FIELDS})`;
 
 /**
  * `auction_state` should always contain exactly one row. This helper:

@@ -32,6 +32,12 @@ export interface AuctionState {
   current_player_id: string | null;
   updated_at: string;
   current_player?: Player;
+
+  // Live bidding fields (added in migration 005)
+  current_bid: number;
+  current_bid_team: string | null;
+  next_min_bid: number;
+  current_bid_team_obj?: Team | null;
 }
 
 export interface DashboardStats {

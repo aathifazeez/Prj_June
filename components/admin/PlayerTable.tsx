@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Plus, Pencil, Trash2, UserCircle } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, UserCircle, RotateCcw } from "lucide-react";
 import type { Player, Team, PlayerStatus, PlayerRole } from "@/types";
 import { RoleBadge, StatusBadge } from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -37,6 +37,16 @@ export default function PlayerTable({ players }: Props) {
   const [roleFilter, setRoleFilter]     = useState<PlayerRole | "all">("all");
   const [deleteTarget, setDeleteTarget] = useState<Player | null>(null);
   const [deleting, setDeleting]         = useState(false);
+  const [showResetAll, setShowResetAll] = useState(false);
+  const [resettingAll, setResettingAll] = useState(false);
+
+  const handleResetAll = async () => {
+    setResettingAll(true);
+    await fetch("/api/players/reset", { method: "POST" });
+    setResettingAll(false);
+    setShowResetAll(false);
+    router.refresh();
+  };
 
   const filtered = players.filter((p) => {
     if (statusFilter !== "all" && p.status !== statusFilter) return false;
@@ -91,6 +101,14 @@ export default function PlayerTable({ players }: Props) {
           {ROLE_OPTS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
         </select>
 
+        <Button
+          variant="ghost"
+          size="md"
+          className="whitespace-nowrap"
+          onClick={() => setShowResetAll(true)}
+        >
+          <RotateCcw size={15} /> Reset All to Pending
+        </Button>
         <Link href="/admin/players/new">
           <Button variant="primary" size="md" className="whitespace-nowrap">
             <Plus size={16} /> Add Player
@@ -228,6 +246,21 @@ export default function PlayerTable({ players }: Props) {
           <div className="flex gap-3 justify-end">
             <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
             <Button variant="danger" loading={deleting} onClick={handleDelete}>Delete</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Reset all players modal */}
+      <Modal isOpen={showResetAll} onClose={() => setShowResetAll(false)} title="Reset All Players" size="sm">
+        <div className="flex flex-col gap-4">
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+            This will set <span className="font-semibold" style={{ color: "var(--color-text)" }}>all players</span> back
+            to <span style={{ color: "var(--color-gold)" }}>pending</span> and clear their team, sold price, and auction order.
+            Use this to reset after a test run.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="ghost" onClick={() => setShowResetAll(false)}>Cancel</Button>
+            <Button variant="danger" loading={resettingAll} onClick={handleResetAll}>Reset All</Button>
           </div>
         </div>
       </Modal>

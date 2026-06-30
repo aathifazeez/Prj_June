@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
 import type { Team } from "@/types";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
@@ -16,7 +16,9 @@ interface TeamWithPlayers extends Team {
 export default function TeamTable({ teams }: { teams: TeamWithPlayers[] }) {
   const router = useRouter();
   const [deleteTarget, setDeleteTarget] = useState<Team | null>(null);
+  const [resetTarget,  setResetTarget]  = useState<Team | null>(null);
   const [deleting, setDeleting]         = useState(false);
+  const [resetting, setResetting]       = useState(false);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -24,6 +26,19 @@ export default function TeamTable({ teams }: { teams: TeamWithPlayers[] }) {
     await fetch(`/api/teams/${deleteTarget.id}`, { method: "DELETE" });
     setDeleting(false);
     setDeleteTarget(null);
+    router.refresh();
+  };
+
+  const handleResetBudget = async () => {
+    if (!resetTarget) return;
+    setResetting(true);
+    await fetch(`/api/teams/${resetTarget.id}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ budget_used: 0 }),
+    });
+    setResetting(false);
+    setResetTarget(null);
     router.refresh();
   };
 
@@ -110,6 +125,16 @@ export default function TeamTable({ teams }: { teams: TeamWithPlayers[] }) {
                     {/* Actions */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() => setResetTarget(team)}
+                          title="Reset budget"
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: "var(--color-text-muted)" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-gold)"; e.currentTarget.style.background = "rgba(245,158,11,0.1)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-text-muted)"; e.currentTarget.style.background = "transparent"; }}
+                        >
+                          <RotateCcw size={14} />
+                        </button>
                         <Link href={`/admin/teams/${team.id}`}>
                           <button
                             className="p-1.5 rounded-lg transition-colors"
@@ -149,6 +174,20 @@ export default function TeamTable({ teams }: { teams: TeamWithPlayers[] }) {
           <div className="flex gap-3 justify-end">
             <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
             <Button variant="danger" loading={deleting} onClick={handleDelete}>Delete</Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={!!resetTarget} onClose={() => setResetTarget(null)} title="Reset Budget" size="sm">
+        <div className="flex flex-col gap-4">
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+            Reset <span className="font-semibold" style={{ color: "var(--color-text)" }}>{resetTarget?.name}</span>'s
+            budget used back to <span style={{ color: "var(--color-gold)" }}>0</span>?
+            This only resets the spend counter — it does not change player statuses.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="ghost" onClick={() => setResetTarget(null)}>Cancel</Button>
+            <Button variant="primary" loading={resetting} onClick={handleResetBudget}>Reset Budget</Button>
           </div>
         </div>
       </Modal>

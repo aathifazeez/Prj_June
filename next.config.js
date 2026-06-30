@@ -2,10 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.supabase.co",
+        hostname: "jdlnwaiiegdmpqbzuztu.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
       {
@@ -13,6 +14,14 @@ const nextConfig = {
         hostname: "lh3.googleusercontent.com",
       },
     ],
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // jsPDF uses 'canvas' at runtime in Node — keep it external so the
+      // server bundle doesn't try to resolve it and crash on import.
+      config.externals.push("canvas");
+    }
+    return config;
   },
 };
 
